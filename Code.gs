@@ -107,7 +107,7 @@ function doGet(e) {
     const template = HtmlService.createTemplateFromFile('Index');
     return template.evaluate().setTitle('SOM-AIT | Data Hub').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   } else {
-    const template = HtmlService.createTemplateFromFile('Login');
+    const template = HtmlService.createTemplateFromFile('Login_Style');
     return template.evaluate().setTitle('SOM-AIT | Login').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
 }
