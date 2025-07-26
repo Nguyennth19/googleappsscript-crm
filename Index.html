@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base target="_top">
+    <?!= include('Style'); ?>
+    <title>SOM-AIT | Data Hub</title>
+    <script>
+        let appDataStore = {
+            isDataLoaded: { form: false, charts: false, table: false },
+            userRole: 'viewer'
+        };
+        window.COLUMN_MAP = {}; 
+        const App = { 
+            events: {}, 
+            subscribe(event, fn) { this.events[event] = (this.events[event] || []).concat(fn); }, 
+            publish(event, data) { if (this.events[event]) { this.events[event].forEach(fn => fn(data)); } }, 
+            showLoader(text = 'Loading...') { const overlay = document.getElementById('loading-overlay'); if(overlay) { overlay.querySelector('p').textContent = text; overlay.classList.remove('hidden'); } }, 
+            hideLoader() { const overlay = document.getElementById('loading-overlay'); if(overlay) overlay.classList.add('hidden'); }, 
+            showToast({ message, type = 'success', duration }) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const icons = { success: '✔️', error: '❌', warning: '⚠️', info: 'ℹ️' };
+                const colors = { success: 'bg-green-500', error: 'bg-red-500', warning: 'bg-yellow-500', info: 'bg-blue-500' };
+                if (!duration) { duration = (type === 'error' || type === 'warning') ? 7000 : 3000; }
+                toast.className = `toast-notification ${colors[type] || 'bg-gray-500'} text-white font-bold py-3 px-5 rounded-lg shadow-lg flex items-center`;
+                toast.innerHTML = `<span class="toast-icon">${icons[type] || ''}</span><span class="toast-message">${message}</span><button class="toast-close-btn">&times;</button>`;
+                container.appendChild(toast);
+                requestAnimationFrame(() => toast.classList.add('show'));
+                const timer = setTimeout(() => { toast.classList.remove('show'); toast.addEventListener('transitionend', () => toast.remove(), { once: true }); }, duration);
+                toast.querySelector('.toast-close-btn').addEventListener('click', () => { clearTimeout(timer); toast.classList.remove('show'); toast.addEventListener('transitionend', () => toast.remove(), { once: true }); });
+            },
+            showEditModal(data) { const modal = document.getElementById('edit-modal'); const modalContent = document.getElementById('edit-modal-content'); App.publish('editForm:populate', data); modal.classList.remove('hidden'); requestAnimationFrame(() => { modalContent.classList.remove('scale-95', 'opacity-0'); }); }, 
+            hideEditModal() { const modal = document.getElementById('edit-modal'); const modalContent = document.getElementById('edit-modal-content'); modalContent.classList.add('scale-95', 'opacity-0'); modal.addEventListener('transitionend', () => modal.classList.add('hidden'), { once: true }); },
+            showHistoryModal(data) {
+                const modal = document.getElementById('history-modal');
+                App.publish('historyModal:populate', data);
+                modal.classList.remove('hidden');
+            },
+            hideHistoryModal() {
+                const modal = document.getElementById('history-modal');
+                modal.classList.add('hidden');
+            }
+        };
+        const CacheManager = {
+            KEY_PREFIX: 'crm_app_cache_A5_',
+            get(key) { const item = localStorage.getItem(this.KEY_PREFIX + key); return item ? JSON.parse(item) : null; },
+            set(key, value) { localStorage.setItem(this.KEY_PREFIX + key, JSON.stringify(value)); },
+            clear() { Object.keys(localStorage).filter(k => k.startsWith(this.KEY_PREFIX)).forEach(k => localStorage.removeItem(k)); console.log('App cache cleared.'); },
+            isCacheValid(serverVersion) { const clientVersion = this.get('dataVersion'); return clientVersion && clientVersion === serverVersion; }
+        };
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div id="loading-overlay" class="fixed inset-0 bg-white bg-opacity-75 flex-col items-center justify-center z-[60] flex">
+        <div class="spinner animate-spin rounded-full w-12 h-12 border-4 border-blue-500 border-t-transparent"></div>
+        <p class="mt-4 text-gray-600 font-semibold">Loading Application...</p>
+    </div>
+    <div id="toast-container" class="fixed top-5 right-5 z-[70] space-y-3"></div>
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden">
+        <div id="edit-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-lg transform scale-95 opacity-0">
+             <?!= include('EditForm'); ?>
+        </div>
+    </div>
+    
+    <div id="history-modal" class="fixed inset-0 bg-black bg-opacity-60 z-[55] flex items-center justify-center p-4 hidden">
+        <div id="history-modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-3xl transform">
+             <div class="modal-header">
+                <h3 class="text-lg font-bold text-gray-800">Activity History for <span id="history-candidate-name" class="text-indigo-600"></span></h3>
+                <button type="button" onclick="App.hideHistoryModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+            <div id="history-summary" class="history-summary">
+                <div class="summary-stat">
+                    <span class="stat-title">Zalo Contacts</span>
+                    <p id="history-zalo-count" class="stat-value"></p>
+                </div>
+                <div class="summary-stat">
+                    <span class="stat-title">Email Contacts</span>
+                    <p id="history-email-count" class="stat-value"></p>
+                </div>
+            </div>
+            <div id="history-log-container" class="p-4 md:p-6 max-h-[50vh] overflow-y-auto">
+                </div>
+            <div class="modal-footer">
+                <button type="button" onclick="App.hideHistoryModal()" class="clear-button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-4 lg:p-6">
+        <nav class="tab-navigation">
+            <ul>
+                <li id="tab-link-form" onclick="switchTab('form')">📝 New Candidate</li>
+                <li id="tab-link-table" onclick="switchTab('table')">📋 Candidate List</li>
+                <li id="tab-link-charts" onclick="switchTab('charts')">📊 Analytics</li>
+            </ul>
+        </nav>
+        <div id="tab-content-wrapper">
+            <div id="tab-form" class="tab-content" style="display: none;">
+                <div class="card p-4 md:p-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                        <div class="hidden lg:block rounded-lg shadow-lg bg-cover bg-center" style="background-image: url('https://live.staticflickr.com/65535/54618846116_96bcfd1972.jpg'); min-height: 450px;">
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <h2 class="module-title">New Candidate Information</h2>
+                            <?!= include('Form'); ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="tab-table" class="tab-content" style="display: none;">
+                <div class="card p-4 md:p-6">
+                    <h2 class="module-title">Candidate List</h2>
+                     <?!= include('DataTable'); ?>
+                </div>
+            </div>
+            <div id="tab-charts" class="tab-content" style="display: none;">
+                <div class="card p-4 md:p-6">
+                    <h2 class="module-title">Analytics Dashboard</h2>
+                     <?!= include('Charts'); ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        function switchTab(tabName) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => { tab.style.display = 'none'; });
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+
+            const allLinks = document.querySelectorAll('.tab-navigation li');
+            allLinks.forEach(link => { link.classList.remove('active'); });
+            const activeLink = document.getElementById(`tab-link-${tabName}`);
+            if(activeLink) activeLink.classList.add('active');
+
+            if (!appDataStore.isDataLoaded[tabName]) {
+                App.publish(`tab:load:${tabName}`);
+            }
+        }
+
+        function initializeApp() { 
+            App.showLoader('Initializing...'); 
+            const userRole = (sessionStorage.getItem('userRole') || 'viewer').toLowerCase();
+            appDataStore.userRole = userRole;
+            document.body.classList.add('role-' + userRole);
+            
+            google.script.run
+                .withSuccessHandler(coreData => {
+                    window.COLUMN_MAP = coreData.columnMap; 
+                    appDataStore.appConfig = coreData.appConfig;
+                    if (CacheManager.isCacheValid(coreData.dataVersion)) {
+                        appDataStore.formSettings = CacheManager.get('formSettings');
+                        appDataStore.filterOptions = CacheManager.get('filterOptions');
+                        App.publish('app:ready');
+                    } else {
+                        CacheManager.clear();
+                        CacheManager.set('dataVersion', coreData.dataVersion);
+                        App.publish('app:shell_ready');
+                    }
+                })
+                .withFailureHandler(error => { App.showToast({ message: `Fatal Error: ${error.message}`, type: 'error' }); App.hideLoader(); })
+                .getAppCoreData(); 
+        }
+
+        const setDefaultTab = () => {
+            const defaultTab = appDataStore.userRole === 'admin' ? 'form' : 'table';
+            switchTab(defaultTab);
+        };
+
+        App.subscribe('app:shell_ready', () => { setDefaultTab(); App.hideLoader(); });
+        App.subscribe('app:ready', () => { setDefaultTab(); App.hideLoader(); });
+        App.subscribe('data:updated', () => { 
+            CacheManager.clear();
+            App.publish('tab:load:table', { force: true });
+            App.publish('tab:load:charts', { force: true });
+        });
+        App.subscribe('edit:show', (data) => App.showEditModal(data));
+        App.subscribe('edit:hide', () => App.hideEditModal());
+        
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

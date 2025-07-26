@@ -1,0 +1,335 @@
+<div class="data-table-container">
+    <div class="data-table-header">
+            <div class="data-table-header-row">
+                <div id="total-candidates">Total Candidates: 0</div>
+                <div id="sort-by-container">Sort by: <span id="sort-by-text" class="font-bold">Last update</span></div>
+            </div>
+        <div class="data-table-header-row">
+            <div class="filter-buttons-group">
+                <button id="all-candidates-btn" class="filter-btn active">
+                    <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
+                    All Candidates
+                </button>
+                <div id="filter-gender-btn" class="filter-btn">
+                     <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2ZM12.1585 9.00609C14.7533 9.248 16.75 11.2447 16.75 13.8444V16.75H19.25V22H16.75V19.75H7.25V22H4.75V16.75H7.25V13.8444C7.25 11.2447 9.24669 9.248 11.8415 9.00609C11.9472 9.00204 12.0528 9.00204 12.1585 9.00609Z"></path></svg>
+                    <span class="filter-btn-text">Gender</span>
+                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    <ul class="custom-dropdown-menu"></ul>
+                </div>
+                <div id="filter-program-btn" class="filter-btn">
+                    <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 22H19C19.5523 22 20 21.5523 20 21V6C20 5.44772 19.5523 5 19 5H5C4.44772 5 4 5.44772 4 6V21C4 21.5523 4.44772 22 5 22ZM18 7V11H6V7H18ZM6 13H11V15H6V13ZM6 17H11V19H6V17ZM13 13H18V19H13V13ZM15 3C15.5523 3 16 2.5523 16 2C16 1.44772 15.5523 1 15 1H9C8.44772 1 8 1.44772 8 2C8 2.5523 8.44772 3 9 3H15Z"></path></svg>
+                    <span class="filter-btn-text">Program</span>
+                     <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    <ul class="custom-dropdown-menu"></ul>
+                </div>
+                <div id="filter-channels-btn" class="filter-btn">
+                    <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.92893 13.0711C4.53841 12.6805 4.53841 12.0474 4.92893 11.6569L11.6569 4.92893C12.0474 4.53841 12.6805 4.53841 13.0711 4.92893L19.0711 10.9289C19.4616 11.3195 19.4616 11.9526 19.0711 12.3431L12.3431 19.0711C11.9526 19.4616 11.3195 19.4616 10.9289 19.0711L4.92893 13.0711ZM2 21H12V23H2V21Z"></path></svg>
+                    <span class="filter-btn-text">Channel</span>
+                     <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
+                    <ul class="custom-dropdown-menu"></ul>
+                </div>
+            </div>
+            <div class="search-container">
+                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.031 16.6168L22.3137 20.8995L20.8995 22.3137L16.6168 18.031C15.0769 19.263 13.124 20 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20 13.124 19.263 15.0769 18.031 16.6168ZM16.0247 15.8748C17.2475 14.6146 18 12.8956 18 11C18 7.1325 14.8675 4 11 4C7.1325 4 4 7.1325 4 11C4 14.8675 7.1325 18 11 18C12.8956 18 14.6146 17.2475 15.8748 16.0247L16.0247 15.8748Z"></path></svg>
+                <input id="search-input" type="search" placeholder="Name, Email...">
+                <button id="search-btn">Search</button>
+            </div>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table id="candidate-table">
+            <thead></thead>
+            <tbody id="datatable-body">
+                <tr id="table-empty-state" style="display: none;">
+                    <td colspan="100%" class="p-0">
+                        <div class="empty-state">
+                            <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5C17.2467 2.5 21.5 6.75329 21.5 12C21.5 17.2467 17.2467 21.5 12 21.5C6.75329 21.5 2.5 17.2467 2.5 12C2.5 6.75329 6.75329 2.5 12 2.5ZM12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4ZM12 14C12.5523 14 13 14.4477 13 15C13 15.5523 12.5523 16 12 16C11.4477 16 11 15.5523 11 15C11 14.4477 11.4477 14 12 14ZM11.0258 8.12432L11.5 12.5H12.5L12.9742 8.12432C12.9912 7.94447 12.9126 7.76993 12.7654 7.66921C12.6183 7.56849 12.4317 7.5608 12.2764 7.65063L12.2334 7.67768C12.0781 7.76751 11.9995 7.94205 12.0165 8.1219L11.9742 8.12432L11.0258 8.12432Z"></path></svg>
+                            <div class="empty-state-title">No Candidates Found</div>
+                            <p class="empty-state-description">There are no candidates matching your current filters. Try adjusting your search or add a new candidate.</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="table-footer">
+        <div id="table-info" class="table-info"></div>
+        <div id="pagination-container" class="pagination-container"></div>
+    </div>
+</div>
+<script>
+(() => {
+    const FILTER_CACHE_KEY = 'crm_filter_state';
+    let state = { currentPage: 1, searchTerm: '', sortDirection: 'desc', filters: { gender: '', program: '', channels: '' } };
+    let tableDataStore = [];
+    const elements = { tableBody: document.getElementById('datatable-body'), tableHead: document.querySelector('#candidate-table thead'), emptyStateRow: document.getElementById('table-empty-state'), tableInfo: document.getElementById('table-info'), paginationContainer: document.getElementById('pagination-container'), totalCandidates: document.getElementById('total-candidates'), sortContainer: document.getElementById('sort-by-container'), sortByText: document.getElementById('sort-by-text'), allCandidatesBtn: document.getElementById('all-candidates-btn'), searchInput: document.getElementById('search-input'), searchBtn: document.getElementById('search-btn'), genderFilterBtn: document.getElementById('filter-gender-btn'), programFilterBtn: document.getElementById('filter-program-btn'), channelsFilterBtn: document.getElementById('filter-channels-btn'), };
+
+    const saveFilterState = () => {
+        try {
+            const stateToSave = { filters: state.filters, searchTerm: state.searchTerm, sortDirection: state.sortDirection };
+            localStorage.setItem(FILTER_CACHE_KEY, JSON.stringify(stateToSave));
+        } catch(e) { console.error("Could not save filter state.", e); }
+    };
+
+    const loadFilterState = () => {
+        try {
+            const savedState = localStorage.getItem(FILTER_CACHE_KEY);
+            if (savedState) {
+                const parsedState = JSON.parse(savedState);
+                state.filters = parsedState.filters || { gender: '', program: '', channels: '' };
+                state.searchTerm = parsedState.searchTerm || '';
+                state.sortDirection = parsedState.sortDirection || 'desc';
+
+                elements.searchInput.value = state.searchTerm;
+                elements.sortByText.textContent = state.sortDirection === 'desc' ? 'Last update' : 'Newest update';
+                
+                let hasActiveFilter = false;
+                Object.keys(state.filters).forEach(key => {
+                    const value = state.filters[key];
+                    if(value) {
+                       const btn = document.getElementById(`filter-${key}-btn`);
+                       const textSpan = btn.querySelector('.filter-btn-text');
+                       let baseText = key.charAt(0).toUpperCase() + key.slice(1);
+                       textSpan.innerHTML = `${baseText}: <strong>${value}</strong> <span class="clear-filter-btn" title="Clear this filter">×</span>`;
+                       btn.classList.add('active');
+                       hasActiveFilter = true;
+                    }
+                });
+                if(hasActiveFilter) elements.allCandidatesBtn.classList.remove('active');
+                
+                console.log('Filter state loaded from cache.');
+            }
+        } catch(e) {
+            console.error("Could not load filter state.", e);
+            localStorage.removeItem(FILTER_CACHE_KEY);
+        }
+    };
+
+    const loadData = (page = 1) => {
+        state.currentPage = page; 
+        App.showLoader('Fetching candidates...');
+        const options = { page: state.currentPage, itemsPerPage: appDataStore.appConfig.ITEMS_PER_PAGE, filters: state.filters, searchTerm: state.searchTerm, sortDirection: state.sortDirection };
+        google.script.run
+            .withSuccessHandler(response => { 
+                App.hideLoader(); 
+                if (response.error) { App.showToast({ message: response.error, type: 'error' }); return; } 
+                tableDataStore = response.data; 
+                renderTable(response.data, response.header, response.rowIndexInPayload); 
+                renderPagination(response.totalPages, response.totalItems); 
+                elements.totalCandidates.innerHTML = `Total Candidates: <strong>${response.totalItems}</strong>`; 
+            })
+            .withFailureHandler(err => { App.hideLoader(); App.showToast({ message: `Server Error: ${err.message}`, type: 'error' }); })
+            .getDataForTable(options);
+    };
+    
+    const renderTable = (data, header, rowIndexInPayload) => {
+        const userRole = appDataStore.userRole || 'viewer';
+        const hiddenHeaders = ['NOTE', 'Email', 'Location', 'Zalo', 'Edit History', 'Status History', 'Action Note', 'Collaborator', 'Count Zalo', 'Count Email'];
+        
+        let headerHtml = '<tr>'; 
+        header.forEach(h => { 
+            if (userRole === 'viewer' && h === 'Phone') return;
+            if (!hiddenHeaders.includes(h)) {
+                const isDayUpdate = h === 'Day update';
+                headerHtml += `<th class="${isDayUpdate ? 'day-update-cell' : ''}">${h}</th>`;
+            } 
+        });
+        
+        if (userRole === 'admin' || userRole === 'editor') {
+            headerHtml += '<th class="px-6 py-3 text-center">Zalo</th>';
+            headerHtml += '<th class="px-6 py-3 text-center">Email</th>';
+        }
+        if (userRole === 'admin') {
+            headerHtml += '<th class="px-6 py-3 text-center">Edit</th>';
+        }
+        headerHtml += '</tr>';
+        elements.tableHead.innerHTML = headerHtml;
+
+        elements.tableBody.querySelectorAll("tr:not(#table-empty-state)").forEach(row => row.remove());
+
+        if (!data || data.length === 0) {
+            elements.emptyStateRow.style.display = 'table-row';
+            return;
+        }
+        
+        elements.emptyStateRow.style.display = 'none';
+
+        const tableRowsHtml = data.map(row => {
+            const rowIndex = row[rowIndexInPayload];
+            let rowContentHtml = '';
+            header.forEach((h, index) => {
+                if (userRole === 'viewer' && index === COLUMN_MAP.PHONE) return;
+                if (hiddenHeaders.includes(h)) return;
+
+                const noteTitle = h === 'Name' ? `title="Action Note: ${row[COLUMN_MAP.ACTION_NOTE] || ''}"` : '';
+                const isDayUpdate = h === 'Day update';
+                let cellContent = row[index] || '';
+
+                if(index === COLUMN_MAP.PHONE && cellContent && cellContent !== 'Protected') {
+                    const rawPhone = String(cellContent).replace(/\D/g, '');
+                    cellContent = `<a href="tel:${rawPhone}" class="phone-link">${cellContent}</a>`;
+                }
+                
+                rowContentHtml += `<td class="${isDayUpdate ? 'day-update-cell' : ''}" data-label="${h}" ${noteTitle}>${cellContent}</td>`;
+            });
+            
+            const zaloLink = row[COLUMN_MAP.ZALO] ? `<a href="${row[COLUMN_MAP.ZALO]}" target="_blank" class="action-icon zalo-link" title="Chat on Zalo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/2048px-Icon_of_Zalo.svg.png" class="icon-img"></a>` : '';
+            const emailLink = row[COLUMN_MAP.EMAIL] ? `<button class="action-icon email-btn" title="Send Email">📧</button>` : '';
+            const editLink = `<button class="action-icon edit-btn" title="Edit">✏️</button>`;
+            
+            if (userRole === 'admin' || userRole === 'editor') {
+                 rowContentHtml += `<td class="actions-cell mobile-action-cell" data-label="Zalo">${zaloLink}</td>`;
+                 rowContentHtml += `<td class="actions-cell mobile-action-cell" data-label="Email">${emailLink}</td>`;
+            }
+            if (userRole === 'admin') {
+                rowContentHtml += `<td class="actions-cell mobile-action-cell" data-label="Edit">${editLink}</td>`;
+            }
+
+            return `<tr data-row-index="${rowIndex}">${rowContentHtml}</tr>`;
+        }).join('');
+        
+        elements.tableBody.insertAdjacentHTML('beforeend', tableRowsHtml);
+    };
+
+    const renderPagination = (totalPages, totalItems) => {
+        elements.tableInfo.textContent = `Showing ${Math.min((state.currentPage - 1) * appDataStore.appConfig.ITEMS_PER_PAGE + 1, totalItems)} - ${Math.min(state.currentPage * appDataStore.appConfig.ITEMS_PER_PAGE, totalItems)} of ${totalItems} results.`; if (totalPages <= 1) { elements.paginationContainer.innerHTML = ''; return; } let paginationHtml = ''; paginationHtml += `<button class="page-btn" ${state.currentPage === 1 ? 'disabled' : ''} data-page="${state.currentPage - 1}">&lt;</button>`; let startPage = Math.max(1, state.currentPage - 2); let endPage = Math.min(totalPages, startPage + 4); if (endPage - startPage < 4) startPage = Math.max(1, endPage - 4); for (let i = startPage; i <= endPage; i++) { paginationHtml += `<button class="page-btn ${i === state.currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`; } paginationHtml += `<button class="page-btn" ${state.currentPage === totalPages ? 'disabled' : ''} data-page="${state.currentPage + 1}">&gt;</button>`; elements.paginationContainer.innerHTML = paginationHtml;
+    };
+
+    const setupCustomDropdown = (btn, options, filterKey, baseText) => {
+        const menu = btn.querySelector('.custom-dropdown-menu'); const textSpan = btn.querySelector('.filter-btn-text'); const populate = () => { menu.innerHTML = `<li data-value="">All ${baseText}s</li>` + options.map(o => `<li data-value="${o}">${o}</li>`).join(''); }; populate();
+        btn.addEventListener('click', (e) => {
+            if (e.target.classList.contains('clear-filter-btn')) { e.stopPropagation(); state.filters[filterKey] = ''; textSpan.textContent = baseText; btn.classList.remove('active', 'open'); if(!state.filters.gender && !state.filters.program && !state.filters.channels) { elements.allCandidatesBtn.classList.add('active'); } saveFilterState(); loadData(1); return; }
+            e.stopPropagation(); closeAllDropdowns(btn); btn.classList.toggle('open');
+        });
+        menu.addEventListener('click', (e) => { if (e.target.tagName === 'LI') { const value = e.target.dataset.value; state.filters[filterKey] = value; if (value) { textSpan.innerHTML = `${baseText}: <strong>${value}</strong> <span class="clear-filter-btn" title="Clear this filter">×</span>`; btn.classList.add('active'); } else { textSpan.textContent = baseText; btn.classList.remove('active'); } elements.allCandidatesBtn.classList.remove('active'); saveFilterState(); loadData(1); } });
+    };
+    
+    const closeAllDropdowns = (except) => { document.querySelectorAll('.filter-btn.open').forEach(btn => { if (btn !== except) btn.classList.remove('open'); }); };
+    
+    const initializeFilters = (filterOptions) => {
+        setupCustomDropdown(elements.genderFilterBtn, filterOptions.genders, 'gender', 'Gender');
+        setupCustomDropdown(elements.programFilterBtn, filterOptions.programs, 'program', 'Program');
+        setupCustomDropdown(elements.channelsFilterBtn, filterOptions.channels, 'channels', 'Channel');
+    };
+
+    const loadFilterOptions = () => {
+        google.script.run
+            .withSuccessHandler(options => {
+                appDataStore.filterOptions = options;
+                CacheManager.set('filterOptions', options);
+                initializeFilters(options);
+            })
+            .withFailureHandler(err => App.showToast({ message: `Failed to load filter options: ${err.message}`, type: 'error' }))
+            .getFilterOptions();
+    };
+
+    App.subscribe('tab:load:table', (options = {}) => {
+        if (options.force || !appDataStore.isDataLoaded.table) {
+            console.log('Loading table data...');
+            loadFilterState();
+            loadData(1);
+            if (!appDataStore.filterOptions) {
+                loadFilterOptions();
+            } else {
+                initializeFilters(appDataStore.filterOptions);
+            }
+            appDataStore.isDataLoaded.table = true;
+        }
+    });
+
+    document.addEventListener('click', () => closeAllDropdowns(null));
+    elements.tableBody.addEventListener('click', e => {
+        const phoneLink = e.target.closest('.phone-link');
+        if(phoneLink) {
+            e.preventDefault();
+            const rowTr = phoneLink.closest('tr');
+            const rowIndex = parseInt(rowTr.dataset.rowIndex);
+            
+            google.script.run
+                .withSuccessHandler(() => window.location.href = phoneLink.href)
+                .withFailureHandler(() => window.location.href = phoneLink.href)
+                .logPhoneContact(rowIndex);
+            return;
+        }
+
+        const actionTarget = e.target.closest('.action-icon'); if (!actionTarget) return;
+        const rowTr = actionTarget.closest('tr'); const rowIndex = parseInt(rowTr.dataset.rowIndex);
+        const rowData = tableDataStore.find(r => r[r.length-1] === rowIndex);
+        if (!rowData) return;
+        
+        if (actionTarget.classList.contains('email-btn') || actionTarget.classList.contains('zalo-link')) {
+            const actionType = actionTarget.classList.contains('zalo-link') ? 'zalo' : 'email';
+            const allCells = Array.from(rowTr.querySelectorAll('td'));
+            const statusCell = allCells.find(td => td.dataset.label === 'Status');
+            const dayUpdateCell = allCells.find(td => td.dataset.label === 'Day update');
+
+            if (!statusCell || !dayUpdateCell) { console.error('Required cells not found for optimistic update.'); return; }
+
+            const originalStatusHTML = statusCell.innerHTML;
+            const originalDayUpdateHTML = dayUpdateCell.innerHTML;
+            const originalStatusText = rowData[COLUMN_MAP.STATUS];
+
+            if (originalStatusText === 'New') {
+                statusCell.innerHTML = 'Contacted';
+            }
+            const now = new Date();
+            const formattedDate = ('0' + now.getDate()).slice(-2) + '/' + ('0' + (now.getMonth() + 1)).slice(-2) + '/' + now.getFullYear() + ' ' + ('0' + now.getHours()).slice(-2) + ':' + ('0' + now.getMinutes()).slice(-2);
+            dayUpdateCell.innerHTML = formattedDate;
+
+            if (actionTarget.classList.contains('email-btn')) {
+                 const email = rowData[COLUMN_MAP.EMAIL]; if(email) window.open(`mailto:${email}`, '_blank');
+            }
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (!res.success) {
+                         App.showToast({ message: res.message || 'Action failed.', type: 'error' });
+                         statusCell.innerHTML = originalStatusHTML;
+                         dayUpdateCell.innerHTML = originalDayUpdateHTML;
+                    } else {
+                        console.log('Contact activity logged successfully.');
+                        rowData[COLUMN_MAP.STATUS] = 'Contacted';
+                        rowData[COLUMN_MAP.DAY_UPDATE] = formattedDate;
+                    }
+                })
+                .withFailureHandler(err => {
+                    App.showToast({ message: `Action failed: ${err.message}. Reverting change.`, type: 'error' });
+                    statusCell.innerHTML = originalStatusHTML;
+                    dayUpdateCell.innerHTML = originalDayUpdateHTML;
+                })
+                .handleContactActivity(rowIndex, actionType); 
+        } 
+        else if (actionTarget.classList.contains('edit-btn')) { 
+            App.publish('edit:show', { rowData: rowData, formSettings: appDataStore.formSettings, rowIndex: rowIndex }); 
+        }
+    });
+
+    elements.searchBtn.addEventListener('click', () => { state.searchTerm = elements.searchInput.value; saveFilterState(); loadData(1); }); 
+    elements.searchInput.addEventListener('keyup', e => { if (e.key === 'Enter') { state.searchTerm = elements.searchInput.value; saveFilterState(); loadData(1); } });
+    elements.allCandidatesBtn.addEventListener('click', () => {
+        state.filters = { gender: '', program: '', channels: '' }; 
+        state.searchTerm = '';
+        localStorage.removeItem(FILTER_CACHE_KEY);
+        elements.searchInput.value = '';
+        document.querySelectorAll('.filter-btn').forEach(btn => { 
+            btn.classList.remove('active', 'open'); 
+            const textSpan = btn.querySelector('.filter-btn-text'); 
+            if(textSpan) { 
+                if(btn.id === 'filter-gender-btn') textSpan.textContent = 'Gender'; 
+                if(btn.id === 'filter-program-btn') textSpan.textContent = 'Program'; 
+                if(btn.id === 'filter-channels-btn') textSpan.textContent = 'Channel'; 
+            } 
+        });
+        elements.allCandidatesBtn.classList.add('active'); 
+        loadData(1);
+    });
+    elements.sortContainer.addEventListener('click', () => { 
+        state.sortDirection = state.sortDirection === 'desc' ? 'asc' : 'desc'; 
+        elements.sortByText.textContent = state.sortDirection === 'desc' ? 'Last update' : 'Newest update'; 
+        saveFilterState();
+        loadData(state.currentPage); 
+    });
+    elements.paginationContainer.addEventListener('click', e => { const pageBtn = e.target.closest('.page-btn'); if (pageBtn && !pageBtn.disabled) loadData(parseInt(pageBtn.dataset.page)); });
+    
+})();
+</script>

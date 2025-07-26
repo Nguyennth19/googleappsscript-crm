@@ -1,0 +1,212 @@
+<form id="new-candidate-form" class="modern-form" novalidate>
+  <div class="form-group">
+    <label for="name" class="form-label">Full Name</label>
+    <input type="text" id="name" name="name" class="form-input" placeholder="Enter candidate's full name">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Gender</label>
+    <div class="gender-options">
+      <input type="radio" id="gender-man" name="gender" value="Man">
+      <label for="gender-man">Man</label>
+      <input type="radio" id="gender-woman" name="gender" value="Woman">
+      <label for="gender-woman">Woman</label>
+      <input type="radio" id="gender-other" name="gender" value="Other" checked>
+      <label for="gender-other">Other</label>
+    </div>
+  </div>
+  <div class="form-flex">
+    <div class="form-group">
+      <label for="phone" class="form-label">Phone Number</label>
+      <input type="tel" id="phone" name="phone" class="form-input" placeholder="0xxx xxx xxx">
+    </div>
+    <div class="form-group">
+      <label for="email" class="form-label">Email</label>
+      <input type="email" id="email" name="email" class="form-input" placeholder="Enter email address">
+    </div>
+  </div>
+  <div class="form-flex">
+    <div class="form-group">
+      <label for="program" class="form-label">Program <span class="required">*</span></label>
+      <select id="program" name="program" class="form-input" required>
+        <option value="" disabled selected>Loading...</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="channels" class="form-label">Channel <span class="required">*</span></label>
+      <select id="channels" name="channels" class="form-input" required>
+        <option value="" disabled selected>Loading...</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+      <label for="location" class="form-label">Location</label>
+      <select id="location" name="location" class="form-input">
+        <option value="" disabled selected>Loading...</option>
+      </select>
+  </div>
+  <div class="form-buttons">
+    <button type="submit" id="save-btn" class="submit-button">Save Information</button>
+    <button type="button" id="clear-btn" class="clear-button">Clear Form</button>
+  </div>
+</form>
+
+<script>
+(() => {
+    const form = document.getElementById('new-candidate-form');
+    if (!form) return;
+    const saveBtn = document.getElementById('save-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const phoneInput = document.getElementById('phone');
+    
+    let isFormDirty = false;
+    const DRAFT_KEY = 'new_candidate_draft';
+    let autoSaveTimer;
+
+    // S6: Tự động định dạng SĐT
+    const formatPhoneNumber = (e) => {
+        let input = e.target.value.replace(/\D/g, '').substring(0, 10);
+        let formatted = '';
+        if (input.length > 6) {
+            formatted = `${input.substring(0,4)} ${input.substring(4,7)} ${input.substring(7,10)}`;
+        } else if (input.length > 3) {
+            formatted = `${input.substring(0,4)} ${input.substring(4,7)}`;
+        } else {
+            formatted = input;
+        }
+        e.target.value = formatted;
+    };
+    phoneInput.addEventListener('input', formatPhoneNumber);
+
+    // S7: Tự động lưu và khôi phục bản nháp
+    const saveDraft = () => {
+        if (!isFormDirty) return;
+        const formData = Object.fromEntries(new FormData(form));
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+        console.log('Draft saved.');
+    };
+    const clearDraft = () => localStorage.removeItem(DRAFT_KEY);
+    const restoreDraft = (draftData) => {
+        for (const key in draftData) {
+            if (form.elements[key]) {
+                if(form.elements[key].type === 'radio') {
+                    const radio = form.querySelector(`[name="${key}"][value="${draftData[key]}"]`);
+                    if(radio) radio.checked = true;
+                } else {
+                    form.elements[key].value = draftData[key];
+                }
+            }
+        }
+        App.showToast({ message: 'Draft restored.', type: 'info' });
+    };
+    const checkForDraft = () => {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if(draft) {
+            if (confirm('We found an unsaved draft. Do you want to restore it?')) {
+                restoreDraft(JSON.parse(draft));
+            } else {
+                clearDraft();
+            }
+        }
+    };
+    
+    const setDirty = () => { 
+        isFormDirty = true;
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveDraft, 2000); // Lưu nháp sau 2s không nhập
+    };
+    form.addEventListener('input', setDirty);
+    form.addEventListener('change', setDirty);
+
+    window.addEventListener('beforeunload', (e) => {
+        if (isFormDirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    const populate = (id, data, placeholder) => {
+        const select = document.getElementById(id);
+        if (select) {
+            select.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+            select.innerHTML += data.map(o => `<option value="${o}">${o}</option>`).join('');
+            if (!select.hasAttribute('required')) {
+              const emptyOption = document.createElement('option');
+              emptyOption.value = "";
+              select.insertBefore(emptyOption, select.options[1]);
+            }
+        }
+    };
+    
+    const loadFormSettings = () => {
+        console.log('Loading form settings...');
+        google.script.run
+            .withSuccessHandler(formSettings => {
+                appDataStore.formSettings = formSettings;
+                CacheManager.set('formSettings', formSettings);
+                populate('program', formSettings.programs, 'Select a program');
+                populate('channels', formSettings.channels, 'Select a channel');
+                populate('location', formSettings.locations, 'Select a location');
+                appDataStore.isDataLoaded.form = true;
+                App.publish('data:formSettingsLoaded', formSettings);
+                checkForDraft(); // S7: Kiểm tra bản nháp sau khi form đã sẵn sàng
+            })
+            .withFailureHandler(err => App.showToast({ message: `Failed to load form options: ${err.message}`, type: 'error' }))
+            .getFormSettings();
+    }
+
+    App.subscribe('tab:load:form', () => {
+        if (appDataStore.formSettings) {
+            populate('program', appDataStore.formSettings.programs, 'Select a program');
+            populate('channels', appDataStore.formSettings.channels, 'Select a channel');
+            populate('location', appDataStore.formSettings.locations, 'Select a location');
+            appDataStore.isDataLoaded.form = true;
+            checkForDraft();
+        } else {
+            loadFormSettings();
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clear all entered information?')) {
+            form.reset();
+            document.getElementById('gender-other').checked = true;
+            App.showToast({ message: 'Form has been cleared.', type: 'info' });
+            isFormDirty = false;
+            clearDraft();
+        }
+    });
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!form.checkValidity()) { 
+            App.showToast({ message: `Please fill all required fields.`, type: 'error' });
+            return; 
+        }
+        
+        const originalButtonText = saveBtn.textContent;
+        saveBtn.textContent = 'Saving...'; 
+        saveBtn.disabled = true;
+        const formData = Object.fromEntries(new FormData(form));
+
+        google.script.run
+            .withSuccessHandler((res) => {
+                App.showToast(res);
+                saveBtn.textContent = originalButtonText; 
+                saveBtn.disabled = false;
+                if (res.success) { 
+                    form.reset(); 
+                    document.getElementById('gender-other').checked = true;
+                    isFormDirty = false;
+                    clearDraft();
+                    App.publish('data:updated');
+                }
+            })
+            .withFailureHandler((err) => {
+                App.showToast({ message: err.message, type: 'error' });
+                saveBtn.textContent = originalButtonText; 
+                saveBtn.disabled = false;
+            })
+            .saveCandidateData(formData);
+    });
+})();
+</script>

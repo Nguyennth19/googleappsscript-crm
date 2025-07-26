@@ -1,0 +1,153 @@
+<div class="mb-4 flex justify-center items-center gap-2 flex-wrap" id="charts-time-filter">
+    <button class="filter-btn-time" data-range="7">7 Days</button>
+    <button class="filter-btn-time" data-range="30">30 Days</button>
+    <button class="filter-btn-time" data-range="90">90 Days</button>
+    <button class="filter-btn-time active" data-range="all">All Time</button>
+</div>
+<div id="charts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="chart-card flex flex-col p-4">
+    <h3 class="chart-title mb-4">Program Distribution</h3>
+    <div class="relative h-72">
+      <canvas id="programChart"></canvas>
+      <div id="programChart-empty" class="empty-state-wrapper" style="display: none;">
+          <div class="empty-state h-full">
+              <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3H21V5H3V3ZM3 19H21V21H3V19ZM13 9H21V11H13V9ZM13 13H21V15H13V13ZM3 9H11V15H3V9Z"></path></svg>
+              <div class="empty-state-title">No Data to Display</div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="chart-card flex flex-col p-4">
+    <h3 class="chart-title mb-4">Gender Distribution</h3>
+    <div class="relative h-72">
+       <canvas id="genderChart"></canvas>
+       <div id="genderChart-empty" class="empty-state-wrapper" style="display: none;">
+          <div class="empty-state h-full">
+              <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3H21V5H3V3ZM3 19H21V21H3V19ZM13 9H21V11H13V9ZM13 13H21V15H13V13ZM3 9H11V15H3V9Z"></path></svg>
+              <div class="empty-state-title">No Data to Display</div>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="chart-card flex flex-col p-4">
+    <h3 class="chart-title mb-4">Channel Distribution</h3>
+    <div class="relative h-72">
+      <canvas id="channelChart"></canvas>
+      <div id="channelChart-empty" class="empty-state-wrapper" style="display: none;">
+          <div class="empty-state h-full">
+              <svg class="empty-state-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3H21V5H3V3ZM3 19H21V21H3V19ZM13 9H21V11H13V9ZM13 13H21V15H13V13ZM3 9H11V15H3V9Z"></path></svg>
+              <div class="empty-state-title">No Data to Display</div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.chart-title { font-size:1rem; font-weight:600; color:#4a5568; text-align:center; }
+.empty-state-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.filter-btn-time { padding: 6px 16px; border: 1px solid #ddd; border-radius: 9999px; background-color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease; }
+.filter-btn-time:hover { background-color: #f0f0f0; border-color: #ccc; }
+.filter-btn-time.active { background-color: #0d6efd; color: #fff; border-color: #0d6efd; font-weight: 600; }
+</style>
+<script>
+(() => {
+    const charts = { programChart: null, genderChart: null, channelChart: null };
+    const palettes = {
+        program: ['#34d399', '#60a5fa', '#facc15', '#f87171', '#c084fc', '#fb923c'],
+        gender: ['#60a5fa', '#f87171', '#facc15'],
+        channel: ['#2dd4bf', '#fbbf24', '#a78bfa', '#38bdf8', '#f472b6', '#818cf8']
+    };
+
+    const renderChart = (ctxId, type, data, colors, labelKey) => {
+        const canvas = document.getElementById(ctxId);
+        const emptyState = document.getElementById(ctxId + '-empty');
+        if (!canvas || !emptyState) return;
+
+        if (!data || data.length === 0) {
+            canvas.style.display = 'none'; 
+            emptyState.style.display = 'block';
+            if(charts[ctxId]) {
+                charts[ctxId].destroy(); 
+                charts[ctxId] = null; 
+            }
+            return;
+        }
+        
+        canvas.style.display = 'block';
+        emptyState.style.display = 'none';
+
+        const labels = data.map(item => item[labelKey]);
+        const counts = data.map(item => item.count);
+        if (charts[ctxId]) {
+            charts[ctxId].data.labels = labels;
+            charts[ctxId].data.datasets[0].data = counts;
+            charts[ctxId].update();
+        } else {
+            charts[ctxId] = new Chart(canvas.getContext('2d'), { 
+                type: type, 
+                data: { 
+                    labels: labels, 
+                    datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0 }] 
+                }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { 
+                            display: type !== 'bar', 
+                            position: 'bottom', 
+                            labels: { boxWidth: 12 } 
+                        } 
+                    } 
+                } 
+            });
+        }
+    };
+    
+    const renderAllCharts = (data) => {
+        renderChart('programChart', 'bar', data.programData, palettes.program, 'program');
+        renderChart('genderChart', 'doughnut', data.genderData, palettes.gender, 'gender');
+        renderChart('channelChart', 'bar', data.channelData, palettes.channel, 'channel');
+    };
+
+    const loadChartsData = (range = 'all') => {
+        console.log(`Loading charts data for range: ${range}`);
+        App.showLoader('Filtering charts...');
+        google.script.run
+            .withSuccessHandler(newChartData => { 
+                if (range === 'all') { 
+                    appDataStore.chartsData = newChartData;
+                    CacheManager.set('chartsData', newChartData);
+                }
+                renderAllCharts(newChartData); 
+                appDataStore.isDataLoaded.charts = true;
+                App.hideLoader(); 
+            })
+            .withFailureHandler(err => { App.showToast({ message: err.message, type: 'error' }); App.hideLoader(); })
+            .getChartsData(range);
+    }
+    
+    App.subscribe('tab:load:charts', (options = {}) => {
+        if (options.force) {
+            loadChartsData();
+            return;
+        }
+        if (appDataStore.chartsData) {
+            renderAllCharts(appDataStore.chartsData);
+            appDataStore.isDataLoaded.charts = true;
+        } else {
+            loadChartsData();
+        }
+    });
+
+    const timeFilterContainer = document.getElementById('charts-time-filter');
+    if (timeFilterContainer) {
+        timeFilterContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('.filter-btn-time'); if (!button || button.classList.contains('active')) return;
+            timeFilterContainer.querySelectorAll('.filter-btn-time').forEach(btn => btn.classList.remove('active')); button.classList.add('active');
+            const range = button.dataset.range;
+            loadChartsData(range);
+        });
+    }
+})();
+</script>

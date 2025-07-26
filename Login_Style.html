@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SOM-AIT | Login</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <base target="_top">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <?!= include('Login_Style'); ?>
+</head>
+<body>
+  <div class="container">
+    <div class="row px-3">
+      <div class="col-lg-10 col-xl-9 card flex-row mx-auto px-0">
+        <div class="img-left d-none d-md-flex"></div>
+
+        <div class="card-body">
+          <div class="text-center mb-4">
+            <img src="https://live.staticflickr.com/65535/54579344644_c6a9e97bf6_b.jpg" alt="Logo" style="max-width: 150px; margin: auto;">
+          </div>
+          <h4 class="title text-center mt-2">
+            Login into SOM CRM
+          </h4>
+
+          <form id="loginForm" class="form-box px-3" novalidate>
+            <div class="form-input">
+              <span><i class="fa fa-user-o"></i></span>
+              <input type="email" id="username" placeholder="Account" tabindex="10" required>
+            </div>
+            <div class="form-input">
+              <span><i class="fa fa-key"></i></span>
+              <input type="password" id="password" placeholder="Password" required>
+              <button type="button" id="togglePassword" class="toggle-password">
+                <i class="fa fa-eye"></i>
+              </button>
+            </div>
+
+            <div class="mb-3">
+              <button type="submit" id="loginButton" class="btn btn-block text-uppercase">
+                Login
+              </button>
+            </div>
+            
+            <p id="loginMessage" class="text-center text-danger mt-3 h-5"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+    const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
+    const loginMessage = document.getElementById('loginMessage');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+
+    togglePasswordBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        loginMessage.textContent = '';
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!username || !password) {
+            loginMessage.textContent = 'Please enter both username and password.';
+            return;
+        }
+
+        loginButton.disabled = true;
+        loginButton.textContent = 'Logging in...';
+
+        google.script.run
+            .withSuccessHandler(response => {
+                if (response.success) {
+                    sessionStorage.setItem('userRole', response.role); // S18: Save role to session storage
+                    loginMessage.textContent = response.message;
+                    loginMessage.classList.remove('text-danger');
+                    loginMessage.classList.add('text-success');
+                    window.top.location.href = response.redirectUrl;
+                } else {
+                    loginMessage.textContent = response.message;
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login';
+                }
+            })
+            .withFailureHandler(error => {
+                loginMessage.textContent = `System Error: ${error.message}`;
+                loginButton.disabled = false;
+                loginButton.textContent = 'Login';
+            })
+            .authenticateUser(username, password);
+    });
+</script>
+</body>
+</html>

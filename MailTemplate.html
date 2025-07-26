@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+      .header { font-size: 24px; font-weight: bold; color: #007bff; margin-bottom: 20px; }
+      .footer { margin-top: 30px; font-size: 12px; color: #888; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">Information from SOM-AIT</div>
+      <p>Dear <?!= data.Name ?>,</p>
+      <p>
+        Thank you for your interest in our programs. This is a confirmation email regarding your registration for the 
+        <strong><?!= data.Program ?></strong> program.
+      </p>
+      <p>We will contact you soon via the phone number (<?!= data.Phone ?>) or this email address.</p>
+      <p>Best regards,<br>SOM-AIT Admissions Team</p>
+      <div class="footer">
+        <p>This is an automated email. Please do not reply directly.</p>
+      </div>
+    </div>
+  </body>
+</html>

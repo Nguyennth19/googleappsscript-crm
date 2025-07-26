@@ -1,0 +1,257 @@
+<form id="edit-candidate-form" class="modal-form p-4" novalidate>
+    <input type="hidden" name="rowIndex">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-800">Edit Candidate</h3>
+        <button type="button" id="close-edit-modal-btn" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+    </div>
+
+    <div class="max-h-[70vh] overflow-y-auto pr-2">
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="edit-name" class="form-label">Full Name</label>
+                <input type="text" id="edit-name" name="name" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gender</label>
+                <div id="edit-gender-group" class="gender-options">
+                    <input type="radio" id="edit-gender-man" name="gender" value="Man">
+                    <label for="edit-gender-man">Man</label>
+                    <input type="radio" id="edit-gender-woman" name="gender" value="Woman">
+                    <label for="edit-gender-woman">Woman</label>
+                    <input type="radio" id="edit-gender-other" name="gender" value="Other">
+                    <label for="edit-gender-other">Other</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="edit-phone" class="form-label">Phone Number</label>
+                <input type="tel" id="edit-phone" name="phone" class="form-input" placeholder="0xxx xxx xxx">
+            </div>
+            <div class="form-group">
+                <label for="edit-email" class="form-label">Email</label>
+                <input type="email" id="edit-email" name="email" class="form-input">
+            </div>
+        </div>
+        
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="edit-program" class="form-label">Program <span class="required">*</span></label>
+                <select id="edit-program" name="program" class="form-input" required></select>
+            </div>
+            <div class="form-group">
+                <label for="edit-channels" class="form-label">Channel <span class="required">*</span></label>
+                <select id="edit-channels" name="channels" class="form-input" required></select>
+            </div>
+        </div>
+
+        <div class="form-flex">
+             <div class="form-group">
+                <label for="edit-location" class="form-label">Location</label>
+                <select id="edit-location" name="location" class="form-input"></select>
+            </div>
+            <div class="form-group">
+                <label for="edit-status" class="form-label">Status <span class="required">*</span></label>
+                <select id="edit-status" name="status" class="form-input" required></select>
+            </div>
+        </div>
+
+        <div id="action-note-group" class="form-group hidden">
+            <label for="edit-action-note" id="action-note-label" class="form-label">Note/Reason</label>
+            <textarea id="edit-action-note" name="actionNote" class="form-input" rows="2"></textarea>
+        </div>
+    </div>
+    
+    <div class="form-buttons">
+        <button type="submit" id="update-btn" class="submit-button">Update</button>
+        <button type="button" id="view-history-btn" class="clear-button" style="background-color: #64748b;">View History</button>
+        <button type="button" id="cancel-edit-btn" class="clear-button">Cancel</button>
+    </div>
+</form>
+
+<script>
+(() => {
+    const form = document.getElementById('edit-candidate-form');
+    if (!form) return;
+    const updateBtn = document.getElementById('update-btn');
+    const viewHistoryBtn = document.getElementById('view-history-btn');
+    const statusSelect = document.getElementById('edit-status');
+    const actionNoteGroup = document.getElementById('action-note-group');
+    const actionNoteInput = document.getElementById('edit-action-note');
+    const actionNoteLabel = document.getElementById('action-note-label');
+    const phoneInput = document.getElementById('edit-phone');
+    
+    let isEditFormDirty = false;
+    let originalStatus = '';
+    let currentCandidateDataForHistory = {};
+
+    const formatPhoneNumber = (e) => {
+        let input = e.target.value.replace(/\D/g, '').substring(0, 10);
+        let formatted = '';
+        if (input.length > 6) {
+            formatted = `${input.substring(0,4)} ${input.substring(4,7)} ${input.substring(7,10)}`;
+        } else if (input.length > 3) {
+            formatted = `${input.substring(0,4)} ${input.substring(4,7)}`;
+        } else {
+            formatted = input;
+        }
+        e.target.value = formatted;
+    };
+    phoneInput.addEventListener('input', formatPhoneNumber);
+
+    const setDirty = () => { isEditFormDirty = true; };
+    form.addEventListener('input', setDirty);
+    form.addEventListener('change', setDirty);
+
+    const handleCloseAction = () => {
+        if (isEditFormDirty && !confirm('You have unsaved changes. Are you sure you want to close?')) {
+            return;
+        }
+        App.publish('edit:hide');
+    };
+
+    document.getElementById('close-edit-modal-btn').addEventListener('click', handleCloseAction);
+    document.getElementById('cancel-edit-btn').addEventListener('click', handleCloseAction);
+
+    const populateSelect = (select, options, selectedValue) => {
+        if (!select || !options) return;
+        const isObjectArray = options.length > 0 && typeof options[0] === 'object' && options[0] !== null;
+        let optionsHtml = '';
+
+        if (isObjectArray) {
+            optionsHtml = options.map(item => `<option value="${item.name}" ${item.name === selectedValue ? 'selected' : ''}>${item.name}</option>`).join('');
+        } else {
+            optionsHtml = options.map(item => `<option value="${item}" ${item === selectedValue ? 'selected' : ''}>${item}</option>`).join('');
+        }
+        select.innerHTML = `<option value="" disabled>Select...</option>${optionsHtml}`;
+        if (!select.value) {
+          select.querySelector('option[disabled]').selected = true;
+        }
+    };
+    
+    const setupForm = (formSettings) => {
+        if (!formSettings) return;
+        populateSelect(form.elements.program, formSettings.programs, form.elements.program.dataset.selected);
+        populateSelect(form.elements.channels, formSettings.channels, form.elements.channels.dataset.selected);
+        populateSelect(form.elements.location, formSettings.locations, form.elements.location.dataset.selected);
+        populateSelect(form.elements.status, formSettings.statuses, form.elements.status.dataset.selected);
+        statusSelect.dispatchEvent(new Event('change'));
+    };
+
+    App.subscribe('data:formSettingsLoaded', setupForm);
+
+    statusSelect.addEventListener('change', (e) => {
+        if (!appDataStore.formSettings) return;
+        const selectedStatusName = e.target.value;
+        const statusObject = appDataStore.formSettings.statuses.find(s => s.name === selectedStatusName);
+
+        if (statusObject && statusObject.requireNote) {
+            actionNoteLabel.textContent = statusObject.prompt || "Note/Reason";
+            actionNoteGroup.classList.remove('hidden');
+            actionNoteInput.required = true;
+        } else {
+            actionNoteGroup.classList.add('hidden');
+            actionNoteInput.required = false;
+            actionNoteInput.value = '';
+        }
+    });
+
+    App.subscribe('editForm:populate', ({ rowData, rowIndex }) => {
+        form.reset();
+        isEditFormDirty = false;
+        originalStatus = rowData[COLUMN_MAP.STATUS];
+        currentCandidateDataForHistory = { rowIndex: rowIndex, name: rowData[COLUMN_MAP.NAME] };
+        
+        actionNoteGroup.classList.add('hidden');
+        actionNoteInput.required = false;
+
+        form.elements.rowIndex.value = rowIndex;
+        form.elements.name.value = rowData[COLUMN_MAP.NAME];
+        
+        const rawPhone = rowData[COLUMN_MAP.PHONE] ? String(rowData[COLUMN_MAP.PHONE]).replace(/\D/g, '') : '';
+        phoneInput.value = rawPhone;
+        formatPhoneNumber({ target: phoneInput });
+
+        form.elements.email.value = rowData[COLUMN_MAP.EMAIL];
+        
+        const genderValue = rowData[COLUMN_MAP.GENDER];
+        const genderRadio = form.querySelector(`#edit-gender-group input[name="gender"][value="${genderValue}"]`);
+        if(genderRadio) genderRadio.checked = true;
+        else form.querySelector(`#edit-gender-group input[name="gender"][value="Other"]`).checked = true;
+
+        form.elements.program.dataset.selected = rowData[COLUMN_MAP.PROGRAM];
+        form.elements.channels.dataset.selected = rowData[COLUMN_MAP.CHANNELS];
+        form.elements.location.dataset.selected = rowData[COLUMN_MAP.LOCATION];
+        form.elements.status.dataset.selected = rowData[COLUMN_MAP.STATUS];
+        form.elements.actionNote.value = rowData[COLUMN_MAP.ACTION_NOTE] || "";
+
+        if (appDataStore.formSettings) {
+             setupForm(appDataStore.formSettings);
+        }
+    });
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        if (!form.checkValidity()) { App.showToast({ message: 'Please fill all required fields.', type: 'error' }); return; }
+        
+        const newStatus = form.elements.status.value;
+        const criticalStatuses = ['Archived', 'Rejected', 'Hired'];
+        if (newStatus !== originalStatus && criticalStatuses.includes(newStatus)) {
+            if (!confirm(`Are you sure you want to change status to "${newStatus}"? This is an important action.`)) {
+                return;
+            }
+        }
+
+        updateBtn.textContent = 'Updating...'; updateBtn.disabled = true;
+        const updatedData = Object.fromEntries(new FormData(form));
+
+        google.script.run
+            .withSuccessHandler(res => {
+                App.showToast(res);
+                if (res.success) {
+                    isEditFormDirty = false;
+                    App.publish('edit:hide');
+                    App.publish('data:updated');
+                }
+                updateBtn.textContent = 'Update';
+                updateBtn.disabled = false;
+            })
+            .withFailureHandler(err => {
+                App.showToast({ message: err.message, type: 'error' });
+                updateBtn.textContent = 'Update';
+                updateBtn.disabled = false;
+            })
+            .updateCandidateData(updatedData);
+    });
+
+    viewHistoryBtn.addEventListener('click', () => {
+        App.showLoader('Fetching history...');
+        google.script.run
+            .withSuccessHandler(historyData => {
+                App.hideLoader();
+                App.showHistoryModal({
+                    name: currentCandidateDataForHistory.name,
+                    data: historyData
+                });
+            })
+            .withFailureHandler(err => {
+                App.hideLoader();
+                App.showToast({ message: `Error getting history: ${err.message}`, type: 'error' });
+            })
+            .getCandidateHistory(currentCandidateDataForHistory.rowIndex);
+    });
+
+    App.subscribe('historyModal:populate', ({name, data}) => {
+        document.getElementById('history-candidate-name').textContent = name;
+        document.getElementById('history-zalo-count').textContent = data.zaloCount || '[ 0 ]';
+        document.getElementById('history-email-count').textContent = data.emailCount || '[ 0 ]';
+        const container = document.getElementById('history-log-container');
+        if (data.logs && data.logs.length > 0) {
+            container.innerHTML = data.logs.map(log => `<p class="history-log-item">${log}</p>`).join('');
+        } else {
+            container.innerHTML = `<p>No history found.</p>`;
+        }
+    });
+})();
+</script>
